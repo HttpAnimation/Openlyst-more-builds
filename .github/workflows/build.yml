@@ -33,9 +33,14 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Install Rust Toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rs/toolchain@v1
         with:
-          targets: x86_64-apple-darwin,aarch64-apple-darwin
+          toolchain: stable
+          profile: minimal
+          target: x86_64-apple-darwin
+      
+      - name: Add arm64 target
+        run: rustup target add aarch64-apple-darwin
 
       - name: Fix macOS Build Configuration
         run: |
@@ -53,6 +58,17 @@ jobs:
           channel: 'stable'
           cache: true
       
+      - name: Rebuild audiotags native libraries
+        run: |
+          # Clone audiotags repo and rebuild the native libraries
+          git clone https://github.com/erikas-taroza/audiotags.git /tmp/audiotags
+          cd /tmp/audiotags
+          flutter pub get --directory=audiotags
+          flutter pub get --directory=cli
+          dart run cli build macos -v
+          # Copy rebuilt libraries to pub cache
+          cp -r audiotags/macos/Libs/* ~/.pub-cache/hosted/pub.dev/audiotags-1.4.5/macos/Libs/
+
       - name: Clean and Build macOS
         run: |
           flutter clean
@@ -156,14 +172,31 @@ jobs:
         run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
       - name: Install Rust Toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rs/toolchain@v1
         with:
-          targets: aarch64-apple-ios,x86_64-apple-ios
+          toolchain: stable
+          profile: minimal
+      
+      - name: Add iOS targets
+        run: |
+          rustup target add aarch64-apple-ios
+          rustup target add x86_64-apple-ios
 
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
           cache: true
+
+      - name: Rebuild audiotags native libraries
+        run: |
+          # Clone audiotags repo and rebuild the native libraries for iOS
+          git clone https://github.com/erikas-taroza/audiotags.git /tmp/audiotags
+          cd /tmp/audiotags
+          flutter pub get --directory=audiotags
+          flutter pub get --directory=cli
+          dart run cli build ios -v
+          # Copy rebuilt libraries to pub cache
+          cp -r audiotags/ios/Libs/* ~/.pub-cache/hosted/pub.dev/audiotags-1.4.5/ios/Libs/
 
       - name: Build iOS
         run: |
