@@ -1,0 +1,84 @@
+name: Manual Multi-Platform Build
+on:
+  workflow_dispatch: # Allows you to click "Run" manually
+
+jobs:
+  # 1. BUILD MACOS (Universal Binary)
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Clone GitLab Repo
+        run: git clone https://gitlab.com/Openlyst/doudou.git .
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+      
+      - name: Build macOS
+        run: |
+          flutter pub get
+          flutter build macos --release
+      
+      - name: Upload macOS Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: doudou-macos
+          path: build/macos/Build/Products/Release/
+
+  # 2. BUILD WINDOWS (x64 and ARM64)
+  build-windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        arch: [x64, arm64]
+    steps:
+      - name: Clone GitLab Repo
+        run: git clone https://gitlab.com/Openlyst/doudou.git .
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Build Windows
+        run: |
+          flutter pub get
+          flutter build windows --release --target-platform=windows-${{ matrix.arch }}
+      
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: doudou-windows-${{ matrix.arch }}
+          path: build/windows/${{ matrix.arch }}/runner/Release/
+
+  # 3. BUILD LINUX ARM64 (Cross-Compile)
+  build-linux-arm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone GitLab Repo
+        run: git clone https://gitlab.com/Openlyst/doudou.git .
+
+      - name: Install ARM64 Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
+          # Install the ARM64 cross-compiler
+          sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Build Linux ARM64
+        run: |
+          flutter pub get
+          # We use the official flutter build command with the target architecture
+          flutter build linux --release --arm64
+      
+      - name: Upload Linux ARM Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: doudou-linux-arm64
+          path: build/linux/arm64/release/bundle/
