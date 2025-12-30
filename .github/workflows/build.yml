@@ -126,7 +126,7 @@ jobs:
       - name: ZIP Linux Build
         run: |
           cd build/linux/arm64/release/bundle/
-          zip -r ../../../../doudou-linux-arm64.zip .
+          zip -r ../../../../../doudou-linux-arm64.zip .
 
       - name: Upload Linux Artifact
         uses: actions/upload-artifact@v4
