@@ -135,9 +135,47 @@ jobs:
           name: doudou-linux-arm64
           path: doudou-linux-arm64.zip
 
-  # 4. CREATE GITHUB RELEASE
+  # 4. BUILD IOS
+  build-ios:
+    runs-on: macos-15
+    continue-on-error: true
+    steps:
+      - name: Clone GitLab Repo
+        run: git clone https://gitlab.com/Openlyst/doudou.git .
+
+      - name: Checkout specific commit
+        if: ${{ github.event.inputs.commit_hash != '' }}
+        run: git checkout ${{ github.event.inputs.commit_hash }}
+
+      - name: Setup Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Build iOS
+        run: |
+          flutter clean
+          flutter pub get
+          flutter build ios --release --no-codesign
+
+      - name: Create unsigned IPA
+        run: |
+          mkdir -p Payload
+          cp -r build/ios/iphoneos/Runner.app Payload/
+          zip -r doudou-ios-unsigned.ipa Payload
+
+      - name: Upload iOS Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: doudou-ios
+          path: doudou-ios-unsigned.ipa
+
+  # 5. CREATE GITHUB RELEASE
   create-release:
-    needs: [build-macos, build-windows, build-linux-arm]
+    needs: [build-macos, build-windows, build-linux-arm, build-ios]
     runs-on: ubuntu-latest
     if: always()
     steps:
@@ -151,6 +189,7 @@ jobs:
         with:
           tag_name: build-${{ github.run_number }}
           name: Doudou Build ${{ github.run_number }}
-          body: "Automated build. Platforms: macOS, Windows x64, Linux ARM64."
+          body: "Automated build. Platforms: macOS, Windows x64, Linux ARM64, iOS."
           files: |
             *.zip
+            *.ipa
