@@ -14,7 +14,7 @@ permissions:
 jobs:
   # 1. BUILD MACOS (Apple Silicon only - audiotags doesn't support x86_64)
   build-macos:
-    runs-on: macos-14
+    runs-on: macos-15
     continue-on-error: true
     outputs:
       app_version: ${{ steps.get_version.outputs.version }}
@@ -34,11 +34,13 @@ jobs:
 
       - name: Fix macOS Build Configuration
         run: |
-          # Update deployment target to macOS 14.0 to match audiotags library requirements
-          find . -name "project.pbxproj" -exec sed -i '' 's/MACOSX_DEPLOYMENT_TARGET = [0-9.]*/MACOSX_DEPLOYMENT_TARGET = 14.0/g' {} +
+          # Select latest Xcode
+          sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+          # Update deployment target to macOS 14.5 to exactly match audiotags library
+          find . -name "project.pbxproj" -exec sed -i '' 's/MACOSX_DEPLOYMENT_TARGET = [0-9.]*/MACOSX_DEPLOYMENT_TARGET = 14.5/g' {} +
           # Update Podfile minimum deployment target
           if [ -f "macos/Podfile" ]; then
-            sed -i '' "s/platform :osx, '[0-9.]*'/platform :osx, '14.0'/g" macos/Podfile
+            sed -i '' "s/platform :osx, '[0-9.]*'/platform :osx, '14.5'/g" macos/Podfile
           fi
 
       - uses: subosito/flutter-action@v2
@@ -46,10 +48,7 @@ jobs:
           channel: 'stable'
           cache: true
       
-      - name: Clean and Build macOS (arm64 only)
-        env:
-          ARCHS: arm64
-          EXCLUDED_ARCHS: x86_64
+      - name: Clean and Build macOS
         run: |
           flutter clean
           flutter pub get
