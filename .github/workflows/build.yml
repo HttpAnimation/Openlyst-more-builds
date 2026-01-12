@@ -327,71 +327,6 @@ jobs:
           name: klit-windows-x64
           path: klit-*-windows-x64.zip
 
-  # 5. BUILD WINDOWS - REPSTORE (x64)
-  build-windows-repstore:
-    if: ${{ github.event.inputs.build_repstore == 'true' }}
-    runs-on: windows-latest
-    continue-on-error: true
-    outputs:
-      version: ${{ steps.version.outputs.version }}
-      build_date: ${{ steps.version.outputs.build_date }}
-      duration: ${{ steps.duration.outputs.duration }}
-      status: ${{ steps.status.outputs.status }}
-    steps:
-      - name: Record start time
-        id: start
-        run: echo "start_time=$(Get-Date -Format 'o')" >> $env:GITHUB_OUTPUT
-
-      - name: Clone GitLab Repo
-        run: git clone https://gitlab.com/Openlyst/repstore.git . 
-
-      - name: Checkout specific commit
-        if: ${{ github.event.inputs.repstore_commit_hash != '' }}
-        run: git checkout ${{ github.event.inputs.repstore_commit_hash }}
-
-      - name: Get version and date
-        id: version
-        run: |
-          $version = (Select-String -Path pubspec.yaml -Pattern '^version:').Line -replace 'version: ', '' -replace '\+.*', ''
-          $date = Get-Date -Format 'yyyy-MM-dd'
-          echo "version=$version" >> $env:GITHUB_OUTPUT
-          echo "build_date=$date" >> $env:GITHUB_OUTPUT
-
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-          cache: true
-
-      - name: Build Windows
-        run: |
-          flutter pub get
-          dart run build_runner build --delete-conflicting-outputs
-          flutter build windows --release
-      
-      - name: ZIP Windows Build
-        run: |
-          $filename = "repstore-${{ steps.version.outputs.version }}-${{ steps.version.outputs.build_date }}-windows-x64.zip"
-          Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath $filename
-
-      - name: Record duration and status
-        id: duration
-        if: always()
-        run: |
-          $start = [DateTime]::Parse("${{ steps.start.outputs.start_time }}")
-          $duration = [Math]::Round(((Get-Date) - $start).TotalMinutes, 1)
-          echo "duration=$duration" >> $env:GITHUB_OUTPUT
-
-      - name: Set status
-        id: status
-        if: always()
-        run: echo "status=${{ job.status }}" >> $env:GITHUB_OUTPUT
-
-      - name: Upload Windows Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: repstore-windows-x64
-          path: repstore-*-windows-x64.zip
-
   # ============================================================================
   # ANDROID BUILDS (APK + AAB)
   # ============================================================================
@@ -1401,129 +1336,6 @@ jobs:
             klit-*-linux-x64.zip
             artifacts/
 
-  # LINUX - REPSTORE
-  build-linux-repstore:
-    if: ${{ github.event.inputs.build_repstore == 'true' }}
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    env:
-      APPIMAGE_EXTRACT_AND_RUN: "1"
-    outputs:
-      version: ${{ steps.version.outputs.version }}
-      build_date: ${{ steps.version.outputs.build_date }}
-      duration: ${{ steps.duration.outputs.duration }}
-      status: ${{ steps.status.outputs.status }}
-    steps:
-      - name: Record start time
-        id: start
-        run: echo "start_time=$(date -Iseconds)" >> $GITHUB_OUTPUT
-
-      - name: Clone GitLab Repo
-        run: git clone https://gitlab.com/Openlyst/repstore.git .
-
-      - name: Checkout specific commit
-        if: ${{ github.event.inputs.repstore_commit_hash != '' }}
-        run: git checkout ${{ github.event.inputs.repstore_commit_hash }}
-
-      - name: Install Linux dependencies
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libstdc++-12-dev libsecret-1-dev dpkg-dev wget file squashfs-tools patchelf plocate libfuse2
-          # Update locate database
-          sudo updatedb || true
-
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-          cache: true
-
-      - name: Install appimagetool
-        run: |
-          wget -q -O /tmp/appimagetool.AppImage "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage"
-          chmod +x /tmp/appimagetool.AppImage
-          cd /tmp && ./appimagetool.AppImage --appimage-extract
-          sudo mv /tmp/squashfs-root /opt/appimagetool
-          sudo ln -sf /opt/appimagetool/AppRun /usr/local/bin/appimagetool
-          # Verify appimagetool works
-          appimagetool --version || echo "appimagetool installed"
-
-      - name: Get version from pubspec
-        id: version
-        run: |
-          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //g' | cut -d'+' -f1)
-          BUILD_DATE=$(date +%Y-%m-%d)
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "build_date=$BUILD_DATE" >> $GITHUB_OUTPUT
-
-      - name: Build Linux
-        run: |
-          flutter config --enable-linux-desktop
-          flutter pub get
-          dart run build_runner build --delete-conflicting-outputs
-          flutter build linux --release --build-name=${{ steps.version.outputs.version }}
-
-      - name: Create ZIP
-        run: |
-          cd build/linux/x64/release
-          zip -r $GITHUB_WORKSPACE/repstore-${{ steps.version.outputs.version }}-${{ steps.version.outputs.build_date }}-linux-x64.zip bundle/
-
-      - name: Install fastforge and build packages
-        run: |
-          dart pub global activate fastforge
-          export PATH="$PATH:$HOME/.pub-cache/bin"
-          export PUB_CACHE="$HOME/.pub-cache"
-          mkdir -p artifacts
-          
-          # Check for configuration files
-          echo "=== Checking configuration files ==="
-          ls -la linux/packaging/ || echo "No linux/packaging directory"
-          ls -la linux/packaging/deb/ 2>/dev/null || echo "No deb config"
-          ls -la linux/packaging/appimage/ 2>/dev/null || echo "No appimage config"
-          cat distribute_options.yaml 2>/dev/null || echo "No distribute_options.yaml"
-          
-          # Build DEB
-          echo "=== Building DEB package ==="
-          $HOME/.pub-cache/bin/fastforge package --platform linux --targets deb --skip-clean || echo "DEB build failed or had warnings"
-          
-          # Build AppImage
-          echo "=== Building AppImage package ==="
-          $HOME/.pub-cache/bin/fastforge package --platform linux --targets appimage --skip-clean || echo "AppImage build failed or had warnings"
-          
-          # Copy artifacts
-          echo "=== Copying artifacts ==="
-          find . -name "*.deb" -type f 2>/dev/null
-          find . -name "*.AppImage" -type f 2>/dev/null
-          find dist -name "*.deb" -exec cp {} artifacts/repstore-${{ steps.version.outputs.version }}-${{ steps.version.outputs.build_date }}-linux-amd64.deb \; 2>/dev/null || true
-          find dist -name "*.AppImage" -exec cp {} artifacts/repstore-${{ steps.version.outputs.version }}-${{ steps.version.outputs.build_date }}-linux-x86_64.AppImage \; 2>/dev/null || true
-          
-          # List what we have
-          echo "=== Final Artifacts ==="
-          ls -la artifacts/ || true
-          ls -laR dist/ 2>/dev/null || true
-
-      - name: Record duration and status
-        id: duration
-        if: always()
-        run: |
-          start_time="${{ steps.start.outputs.start_time }}"
-          start_seconds=$(date -d "$start_time" +%s)
-          end_seconds=$(date +%s)
-          duration=$(echo "scale=1; ($end_seconds - $start_seconds) / 60" | bc)
-          echo "duration=$duration" >> $GITHUB_OUTPUT
-
-      - name: Set status
-        id: status
-        if: always()
-        run: echo "status=${{ job.status }}" >> $GITHUB_OUTPUT
-
-      - name: Upload Linux Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: repstore-linux
-          path: |
-            repstore-*-linux-x64.zip
-            artifacts/
-
   # ============================================================================
   # WEB BUILDS
   # ============================================================================
@@ -1793,73 +1605,6 @@ jobs:
           name: klit-web
           path: klit-*-web.zip
 
-  # WEB - REPSTORE
-  build-web-repstore:
-    if: ${{ github.event.inputs.build_repstore == 'true' }}
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    outputs:
-      version: ${{ steps.version.outputs.version }}
-      build_date: ${{ steps.version.outputs.build_date }}
-      duration: ${{ steps.duration.outputs.duration }}
-      status: ${{ steps.status.outputs.status }}
-    steps:
-      - name: Record start time
-        id: start
-        run: echo "start_time=$(date -Iseconds)" >> $GITHUB_OUTPUT
-
-      - name: Clone GitLab Repo
-        run: git clone https://gitlab.com/Openlyst/repstore.git .
-
-      - name: Checkout specific commit
-        if: ${{ github.event.inputs.repstore_commit_hash != '' }}
-        run: git checkout ${{ github.event.inputs.repstore_commit_hash }}
-
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-          cache: true
-
-      - name: Get version from pubspec
-        id: version
-        run: |
-          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //g' | cut -d'+' -f1)
-          BUILD_DATE=$(date +%Y-%m-%d)
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "build_date=$BUILD_DATE" >> $GITHUB_OUTPUT
-
-      - name: Build Web
-        run: |
-          flutter pub get
-          dart run build_runner build --delete-conflicting-outputs
-          flutter build web --release --build-name=${{ steps.version.outputs.version }}
-
-      - name: Create ZIP
-        run: |
-          cd build
-          zip -r $GITHUB_WORKSPACE/repstore-${{ steps.version.outputs.version }}-${{ steps.version.outputs.build_date }}-web.zip web/
-
-      - name: Record duration and status
-        id: duration
-        if: always()
-        run: |
-          start_time="${{ steps.start.outputs.start_time }}"
-          start_seconds=$(date -d "$start_time" +%s)
-          end_seconds=$(date +%s)
-          duration=$(echo "scale=1; ($end_seconds - $start_seconds) / 60" | bc)
-          echo "duration=$duration" >> $GITHUB_OUTPUT
-
-      - name: Set status
-        id: status
-        if: always()
-        run: echo "status=${{ job.status }}" >> $GITHUB_OUTPUT
-
-      - name: Upload Web Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: repstore-web
-          path: repstore-*-web.zip
-
   # ============================================================================
   # CREATE GITHUB RELEASE
   # ============================================================================
@@ -1869,7 +1614,6 @@ jobs:
       - build-windows-docan
       - build-windows-finar
       - build-windows-klit
-      - build-windows-repstore
       - build-android-doudou
       - build-android-docan
       - build-android-finar
@@ -1879,12 +1623,10 @@ jobs:
       - build-linux-docan
       - build-linux-finar
       - build-linux-klit
-      - build-linux-repstore
       - build-web-doudou
       - build-web-docan
       - build-web-finar
       - build-web-klit
-      - build-web-repstore
     runs-on: ubuntu-latest
     if: always() && !cancelled()
     steps:
@@ -1987,11 +1729,8 @@ jobs:
           # Repstore
           if [ "${{ github.event.inputs.build_repstore }}" == "true" ]; then
             echo "### Repstore" >> release_notes.md
-            echo "- Version: ${{ needs.build-android-repstore.outputs.version || needs.build-windows-repstore.outputs.version || 'N/A' }}" >> release_notes.md
-            echo "- Windows: ${{ needs.build-windows-repstore.outputs.status || 'skipped' }} ${{ needs.build-windows-repstore.outputs.duration && format('({0} min)', needs.build-windows-repstore.outputs.duration) || '' }}" >> release_notes.md
+            echo "- Version: ${{ needs.build-android-repstore.outputs.version || 'N/A' }}" >> release_notes.md
             echo "- Android: ${{ needs.build-android-repstore.outputs.status || 'skipped' }} ${{ needs.build-android-repstore.outputs.duration && format('({0} min)', needs.build-android-repstore.outputs.duration) || '' }} - Signing: ${{ needs.build-android-repstore.outputs.signing || 'N/A' }}" >> release_notes.md
-            echo "- Linux: ${{ needs.build-linux-repstore.outputs.status || 'skipped' }} ${{ needs.build-linux-repstore.outputs.duration && format('({0} min)', needs.build-linux-repstore.outputs.duration) || '' }}" >> release_notes.md
-            echo "- Web: ${{ needs.build-web-repstore.outputs.status || 'skipped' }} ${{ needs.build-web-repstore.outputs.duration && format('({0} min)', needs.build-web-repstore.outputs.duration) || '' }}" >> release_notes.md
             echo "" >> release_notes.md
           fi
           
@@ -2020,10 +1759,7 @@ jobs:
           if [ "${{ needs.build-web-docan.outputs.status }}" == "failure" ]; then FAILED_BUILDS="$FAILED_BUILDS Docan-Web"; fi
           if [ "${{ needs.build-web-finar.outputs.status }}" == "failure" ]; then FAILED_BUILDS="$FAILED_BUILDS Finar-Web"; fi
           if [ "${{ needs.build-web-klit.outputs.status }}" == "failure" ]; then FAILED_BUILDS="$FAILED_BUILDS Klit-Web"; fi
-          if [ "${{ needs.build-windows-repstore.outputs.status }}" == "failure" ]; then FAILED_BUILDS="$FAILED_BUILDS Repstore-Windows"; fi
           if [ "${{ needs.build-android-repstore.outputs.status }}" == "failure" ]; then FAILED_BUILDS="$FAILED_BUILDS Repstore-Android"; fi
-          if [ "${{ needs.build-linux-repstore.outputs.status }}" == "failure" ]; then FAILED_BUILDS="$FAILED_BUILDS Repstore-Linux"; fi
-          if [ "${{ needs.build-web-repstore.outputs.status }}" == "failure" ]; then FAILED_BUILDS="$FAILED_BUILDS Repstore-Web"; fi
           
           if [ -n "$FAILED_BUILDS" ]; then
             echo "🔴 **Failed builds:**$FAILED_BUILDS" >> release_notes.md
