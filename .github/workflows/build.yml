@@ -143,7 +143,16 @@ jobs:
       - name: Build iOS (No Code Signing)
         run: |
           flutter pub get
-          dart run flutter_rust_bridge_codegen build-ios --release || true
+          
+          # Build Rust library for iOS
+          if [ -f "rust/Cargo.toml" ]; then
+            cd rust
+            cargo build --release --target aarch64-apple-ios --lib
+            cd ..
+          elif [ -f "Cargo.toml" ]; then
+            cargo build --release --target aarch64-apple-ios --lib
+          fi
+          
           flutter build ios --release --no-codesign
 
       - name: Create unsigned IPA
