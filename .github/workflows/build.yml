@@ -13,8 +13,23 @@ on:
           - Finar
           - Klit
         default: 'All'
-      commit_hash:
-        description: 'Commit hash to build (leave empty for latest)'
+      doudou_commit_hash:
+        description: 'Doudou commit hash (leave empty for latest)'
+        required: false
+        type: string
+        default: ''
+      docan_commit_hash:
+        description: 'Docan commit hash (leave empty for latest)'
+        required: false
+        type: string
+        default: ''
+      finar_commit_hash:
+        description: 'Finar commit hash (leave empty for latest)'
+        required: false
+        type: string
+        default: ''
+      klit_commit_hash:
+        description: 'Klit commit hash (leave empty for latest)'
         required: false
         type: string
         default: ''
@@ -33,8 +48,8 @@ jobs:
         run: git clone https://gitlab.com/Openlyst/doudou.git . 
 
       - name: Checkout specific commit
-        if: ${{ github.event.inputs.commit_hash != '' }}
-        run: git checkout ${{ github.event.inputs.commit_hash }}
+        if: ${{ github.event.inputs.doudou_commit_hash != '' }}
+        run: git checkout ${{ github.event.inputs.doudou_commit_hash }}
 
       - uses: subosito/flutter-action@v2
         with:
@@ -65,8 +80,8 @@ jobs:
         run: git clone https://gitlab.com/Openlyst/docan.git . 
 
       - name: Checkout specific commit
-        if: ${{ github.event.inputs.commit_hash != '' }}
-        run: git checkout ${{ github.event.inputs.commit_hash }}
+        if: ${{ github.event.inputs.docan_commit_hash != '' }}
+        run: git checkout ${{ github.event.inputs.docan_commit_hash }}
 
       - uses: subosito/flutter-action@v2
         with:
@@ -97,8 +112,8 @@ jobs:
         run: git clone https://gitlab.com/Openlyst/finar.git . 
 
       - name: Checkout specific commit
-        if: ${{ github.event.inputs.commit_hash != '' }}
-        run: git checkout ${{ github.event.inputs.commit_hash }}
+        if: ${{ github.event.inputs.finar_commit_hash != '' }}
+        run: git checkout ${{ github.event.inputs.finar_commit_hash }}
 
       - uses: subosito/flutter-action@v2
         with:
@@ -130,8 +145,8 @@ jobs:
         run: git clone https://gitlab.com/Openlyst/klit.git . 
 
       - name: Checkout specific commit
-        if: ${{ github.event.inputs.commit_hash != '' }}
-        run: git checkout ${{ github.event.inputs.commit_hash }}
+        if: ${{ github.event.inputs.klit_commit_hash != '' }}
+        run: git checkout ${{ github.event.inputs.klit_commit_hash }}
 
       - uses: subosito/flutter-action@v2
         with:
