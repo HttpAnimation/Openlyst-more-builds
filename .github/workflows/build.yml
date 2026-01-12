@@ -6,7 +6,7 @@ on:
         description: 'Build Doudou'
         required: false
         type: boolean
-        default: true
+        default: false
       doudou_commit_hash:
         description: 'Doudou commit hash (leave empty for latest)'
         required: false
@@ -16,7 +16,7 @@ on:
         description: 'Build Docan'
         required: false
         type: boolean
-        default: true
+        default: false
       docan_commit_hash:
         description: 'Docan commit hash (leave empty for latest)'
         required: false
@@ -26,7 +26,7 @@ on:
         description: 'Build Finar'
         required: false
         type: boolean
-        default: true
+        default: false
       finar_commit_hash:
         description: 'Finar commit hash (leave empty for latest)'
         required: false
@@ -36,7 +36,7 @@ on:
         description: 'Build Klit'
         required: false
         type: boolean
-        default: true
+        default: false
       klit_commit_hash:
         description: 'Klit commit hash (leave empty for latest)'
         required: false
