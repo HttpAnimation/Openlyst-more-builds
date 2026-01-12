@@ -11,6 +11,7 @@ on:
           - Doudou
           - Docan
           - Finar
+          - Klit
         default: 'All'
       commit_hash:
         description: 'Commit hash to build (leave empty for latest)'
@@ -119,9 +120,41 @@ jobs:
           name: finar-windows-x64
           path: finar-windows-x64.zip
 
-  # 4. CREATE GITHUB RELEASE
+  # 4. BUILD WINDOWS - KLIT (x64)
+  build-windows-klit:
+    if: ${{ github.event.inputs.app_to_build == 'All' || github.event.inputs.app_to_build == 'Klit' }}
+    runs-on: windows-latest
+    continue-on-error: true
+    steps:
+      - name: Clone GitLab Repo
+        run: git clone https://gitlab.com/Openlyst/klit.git . 
+
+      - name: Checkout specific commit
+        if: ${{ github.event.inputs.commit_hash != '' }}
+        run: git checkout ${{ github.event.inputs.commit_hash }}
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Build Windows
+        run: |
+          flutter pub get
+          flutter build windows --release
+      
+      - name: ZIP Windows Build
+        run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath klit-windows-x64.zip
+
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: klit-windows-x64
+          path: klit-windows-x64.zip
+
+  # 5. CREATE GITHUB RELEASE
   create-release:
-    needs: [build-windows-doudou, build-windows-docan, build-windows-finar]
+    needs: [build-windows-doudou, build-windows-docan, build-windows-finar, build-windows-klit]
     runs-on: ubuntu-latest
     if: always() && !cancelled()
     steps:
