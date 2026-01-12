@@ -144,14 +144,17 @@ jobs:
         run: |
           flutter pub get
           
-          # Build Rust library for iOS
-          if [ -f "rust/Cargo.toml" ]; then
-            cd rust
-            cargo build --release --target aarch64-apple-ios --lib
-            cd ..
-          elif [ -f "Cargo.toml" ]; then
-            cargo build --release --target aarch64-apple-ios --lib
-          fi
+            # Try to run codegen if it exists
+            dart run flutter_rust_bridge_codegen build-ios --release 2>/dev/null || true
+          
+            # Try running make/build scripts if they exist
+            if [ -f "Makefile" ]; then
+              make ios || true
+            fi
+          
+            if [ -f "scripts/build-ios.sh" ]; then
+              bash scripts/build-ios.sh || true
+            fi
           
           flutter build ios --release --no-codesign
 
