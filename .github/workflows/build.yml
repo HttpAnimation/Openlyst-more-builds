@@ -10,6 +10,7 @@ on:
           - All
           - Doudou
           - Docan
+          - Finar
         default: 'All'
       commit_hash:
         description: 'Commit hash to build (leave empty for latest)'
@@ -85,9 +86,42 @@ jobs:
           name: docan-windows-x64
           path: docan-windows-x64.zip
 
-  # 3. CREATE GITHUB RELEASE
+  # 3. BUILD WINDOWS - FINAR (x64)
+  build-windows-finar:
+    if: ${{ github.event.inputs.app_to_build == 'All' || github.event.inputs.app_to_build == 'Finar' }}
+    runs-on: windows-latest
+    continue-on-error: true
+    steps:
+      - name: Clone GitLab Repo
+        run: git clone https://gitlab.com/Openlyst/finar.git . 
+
+      - name: Checkout specific commit
+        if: ${{ github.event.inputs.commit_hash != '' }}
+        run: git checkout ${{ github.event.inputs.commit_hash }}
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Build Windows
+        run: |
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+          flutter build windows --release
+      
+      - name: ZIP Windows Build
+        run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath finar-windows-x64.zip
+
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: finar-windows-x64
+          path: finar-windows-x64.zip
+
+  # 4. CREATE GITHUB RELEASE
   create-release:
-    needs: [build-windows-doudou, build-windows-docan]
+    needs: [build-windows-doudou, build-windows-docan, build-windows-finar]
     runs-on: ubuntu-latest
     if: always() && !cancelled()
     steps:
