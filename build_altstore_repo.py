@@ -14,6 +14,9 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any
 import logging
 from urllib.parse import urljoin
+import tempfile
+import zipfile
+import plistlib
 
 # Configure logging
 logging.basicConfig(
@@ -215,6 +218,19 @@ class AltStoreRepoBuilder:
                 "versions": altstore_versions,
             }
             
+            # Extract and attach permissions from latest valid IPA
+            latest_ipa = altstore_versions[0].get("downloadURL")
+            if latest_ipa:
+                perms = self.extract_permissions_from_ipa(latest_ipa)
+                if perms:
+                    app_entry["appPermissions"] = perms
+                    logger.info(
+                        f"Permissions for {slug}: entitlements={len(perms.get('entitlements', []))}, "
+                        f"privacyKeys={len(perms.get('privacy', {}))}"
+                    )
+                else:
+                    logger.info(f"No permissions extracted for {slug}")
+
             # Add optional fields
             if app.get('screenshots'):
                 app_entry['screenshots'] = self._process_screenshots(app['screenshots'])
@@ -223,6 +239,87 @@ class AltStoreRepoBuilder:
         
         except Exception as e:
             logger.error(f"Error building app entry for {slug}: {e}", exc_info=True)
+            return None
+
+    def extract_permissions_from_ipa(self, ipa_url: str) -> Optional[Dict[str, Any]]:
+        """Download IPA and extract entitlements and privacy usage descriptions.
+
+        Returns an AltStore-compatible appPermissions object or None if unavailable.
+        """
+        try:
+            # Download IPA to a temp file
+            with tempfile.NamedTemporaryFile(suffix=".ipa", delete=True) as tmp:
+                logger.info(f"Downloading IPA for permissions: {ipa_url}")
+                with self.client.session.get(ipa_url, stream=True, timeout=60) as r:
+                    r.raise_for_status()
+                    for chunk in r.iter_content(chunk_size=1024 * 256):
+                        if chunk:
+                            tmp.write(chunk)
+                tmp.flush()
+
+                entitlements: List[str] = []
+                privacy: Dict[str, str] = {}
+
+                # Open IPA as a zip
+                with zipfile.ZipFile(tmp.name, 'r') as z:
+                    # Find the .app directory inside Payload/
+                    app_dirs = [
+                        name for name in z.namelist()
+                        if name.startswith('Payload/') and name.endswith('.app/')
+                    ]
+                    if not app_dirs:
+                        logger.warning("IPA does not contain a Payload .app directory")
+                        return None
+                    app_dir = app_dirs[0]
+
+                    # Parse Info.plist for privacy usage descriptions
+                    info_candidates = [
+                        app_dir + 'Info.plist',
+                    ]
+                    for info_path in info_candidates:
+                        if info_path in z.namelist():
+                            with z.open(info_path) as f:
+                                try:
+                                    plist = plistlib.load(f)
+                                    for k, v in plist.items():
+                                        if isinstance(k, str) and k.endswith('UsageDescription') and isinstance(v, str):
+                                            privacy[k] = v
+                                except Exception as e:
+                                    logger.debug(f"Failed parsing Info.plist {info_path}: {e}")
+                            break
+
+                    # Parse entitlements from archived-expanded-entitlements.xcent or similar
+                    possible_ent_paths = [
+                        app_dir + 'archived-expanded-entitlements.xcent',
+                        app_dir + 'entitlements.plist',
+                    ]
+                    for ent_path in possible_ent_paths:
+                        if ent_path in z.namelist():
+                            with z.open(ent_path) as f:
+                                try:
+                                    ent_plist = plistlib.load(f)
+                                    if isinstance(ent_plist, dict):
+                                        entitlements = sorted(list(ent_plist.keys()))
+                                except Exception as e:
+                                    logger.debug(f"Failed parsing entitlements {ent_path}: {e}")
+                            break
+
+                # Filter out entitlements AltStore says are always present
+                filtered_ents = [
+                    e for e in entitlements
+                    if e not in ("com.apple.developer.team-identifier", "application-identifier")
+                ]
+
+                if not filtered_ents and not privacy:
+                    return None
+
+                return {
+                    "entitlements": filtered_ents,
+                    "privacy": privacy,
+                }
+
+        except Exception as e:
+            logger.info(f"Could not extract permissions from IPA: {e}")
             return None
     
     def _map_category(self, category: str) -> str:
