@@ -39,8 +39,7 @@ env/
 htmlcov/
 
 # Build artifacts
-repo/apps.json
-repo/index.json
+# Note: repo/ directory is tracked for GitHub Pages serving
 
 # Temporary files
 *.tmp
