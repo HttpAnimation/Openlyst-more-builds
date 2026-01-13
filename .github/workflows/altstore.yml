@@ -1,0 +1,274 @@
+name: Build AltStore Repository
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      repo_url:
+        description: 'Repository base URL (default: GitHub Raw)'
+        required: false
+        default: 'https://raw.githubusercontent.com/httpanimations/Openlyst-more-builds/main/repo'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+      
+      - name: Build AltStore repository
+        env:
+          REPO_URL: ${{ github.event.inputs.repo_url || 'https://raw.githubusercontent.com/httpanimations/Openlyst-more-builds/main/repo' }}
+        run: |
+          python build_altstore_repo.py \
+            --output-dir repo \
+            --repo-url "$REPO_URL" \
+            --verbose
+      
+      - name: Display build output
+        run: |
+          echo "=== Repository Structure ==="
+          ls -lah repo/
+          echo ""
+          echo "=== apps.json (first 50 lines) ==="
+          head -50 repo/apps.json || true
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: altstore-repo
+          path: repo/
+          retention-days: 90
+      
+      - name: Commit and push changes
+        env:
+          REPO_URL: ${{ github.event.inputs.repo_url || 'https://repo.openlyst.ink' }}
+        run: |
+          git config user.name "AltStore Builder Bot"
+          git config user.email "action@github.com"
+          
+          # Add repo files
+          git add repo/
+          
+          # Only commit if there are changes
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: update AltStore repository [skip ci]"
+            git push
+          else
+            echo "No changes to commit"
+          fi
+      
+      - name: Create Release
+        if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: repo/*
+          tag_name: altstore-repo-${{ github.run_number }}
+          body: |
+            # AltStore Repository Build ${{ github.run_number }}
+            
+            Generated from OpenLyst API
+            
+            **Repository URL**: https://raw.githubusercontent.com/${{ github.repository }}/main/repo/apps.json
+            
+            **CDN URL**: https://cdn.jsdelivr.net/gh/${{ github.repository }}@main/repo/apps.json
+            
+            **Build Time**: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Pages
+        uses: actions/configure-pages@v4
+      
+      - name: Build site structure
+        run: |
+          mkdir -p _site
+          cp repo/apps.json _site/
+          
+          # Create an HTML landing page
+          cat > _site/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>OpenLyst AltStore Repository</title>
+              <style>
+                  body {
+                      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                      max-width: 1200px;
+                      margin: 0 auto;
+                      padding: 2rem;
+                      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                      min-height: 100vh;
+                      color: #333;
+                  }
+                  .container {
+                      background: white;
+                      border-radius: 12px;
+                      padding: 2rem;
+                      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+                  }
+                  h1 {
+                      color: #667eea;
+                      margin-bottom: 0.5rem;
+                  }
+                  .subtitle {
+                      color: #666;
+                      font-size: 1.1rem;
+                      margin-bottom: 2rem;
+                  }
+                  .code-block {
+                      background: #f5f5f5;
+                      border-left: 4px solid #667eea;
+                      padding: 1rem;
+                      margin: 1rem 0;
+                      border-radius: 4px;
+                      font-family: "Monaco", "Menlo", monospace;
+                      overflow-x: auto;
+                  }
+                  .button {
+                      display: inline-block;
+                      background: #667eea;
+                      color: white;
+                      padding: 0.75rem 1.5rem;
+                      border-radius: 6px;
+                      text-decoration: none;
+                      margin: 0.5rem 0.5rem 0.5rem 0;
+                      transition: background 0.3s;
+                  }
+                  .button:hover {
+                      background: #764ba2;
+                  }
+                  .info-grid {
+                      display: grid;
+                      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                      gap: 1.5rem;
+                      margin: 2rem 0;
+                  }
+                  .info-card {
+                      border: 1px solid #ddd;
+                      padding: 1.5rem;
+                      border-radius: 8px;
+                      background: #fafafa;
+                  }
+                  .info-card h3 {
+                      color: #667eea;
+                      margin-top: 0;
+                  }
+                  .footer {
+                      text-align: center;
+                      color: #999;
+                      font-size: 0.9rem;
+                      margin-top: 2rem;
+                      padding-top: 1rem;
+                      border-top: 1px solid #eee;
+                  }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <h1>🎯 OpenLyst AltStore Repository</h1>
+                  <p class="subtitle">Free and open source iOS applications</p>
+                  
+                  <div class="info-grid">
+                      <div class="info-card">
+                          <h3>📱 Add to AltStore</h3>
+                          <p>Use the following URL in AltStore's source section:</p>
+                          <div class="code-block">https://raw.githubusercontent.com/httpanimations/Openlyst-more-builds/main/repo/apps.json</div>
+                      </div>
+                      
+                      <div class="info-card">
+                          <h3>🔗 Static Repository URL</h3>
+                          <p>This URL never changes between builds:</p>
+                          <div class="code-block">https://repo.openlyst.ink/apps.json</div>
+                      </div>
+                      
+                      <div class="info-card">
+                          <h3>📊 Repository Info</h3>
+                          <p>Metadata about this repository:</p>
+                          <a href="./index.json" class="button">View Index</a>
+                      </div>
+                  </div>
+                  
+                  <h2>📝 How to Use</h2>
+                  <ol>
+                      <li>Open <strong>AltStore</strong> on your iOS device</li>
+                      <li>Go to the <strong>Browse</strong> tab</li>
+                      <li>Tap the <strong>+</strong> button in the top right</li>
+                      <li>Paste the repository URL above</li>
+                      <li>Tap <strong>Add</strong></li>
+                  </ol>
+                  
+                  <h2>🔄 Updates</h2>
+                  <p>This repository is automatically updated daily at 2 AM UTC with the latest apps and versions from OpenLyst.</p>
+                  
+                  <h2>📚 Resources</h2>
+                  <ul>
+                      <li><a href="https://openlyst.ink">OpenLyst Website</a></li>
+                      <li><a href="https://openlyst.ink/docs/api">OpenLyst API Documentation</a></li>
+                      <li><a href="https://altstoreio.github.io/">AltStore Documentation</a></li>
+                      <li><a href="https://github.com/httpanimations/Openlyst-more-builds">Repository Source</a></li>
+                  </ul>
+                  
+                  <div class="footer">
+                      <p>🛠️ Built with OpenLyst API • Generated at <time id="timestamp"></time></p>
+                  </div>
+              </div>
+              
+              <script>
+                  // Fetch and display when repo was last updated
+                  fetch('./index.json')
+                      .then(r => r.json())
+                      .then(data => {
+                          document.getElementById('timestamp').textContent = new Date(data.generatedAt).toLocaleString();
+                      });
+              </script>
+          </body>
+          </html>
+          EOF
+      
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: '_site'
+      
+      - name: Deploy to Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
