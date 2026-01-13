@@ -7,10 +7,36 @@
   "website": "https://openlyst.ink",
   "tintColor": "#dc2626",
   "featuredApps": [
+    "docan",
     "doudou",
     "klit"
   ],
   "apps": [
+    {
+      "name": "Docan",
+      "bundleIdentifier": "docan",
+      "developerName": "OpenLyst Developer",
+      "subtitle": "Universal AI chat application with Liquid Glass design",
+      "localizedDescription": "Docan is a universal AI chat application featuring a stunning Liquid Glass design. Connect with various AI providers and enjoy a seamless chat experience across all your devices.",
+      "iconURL": "https://openlyst.ink/icons/Docan/icon.png",
+      "tintColor": "#6366f1",
+      "category": "other",
+      "versions": [
+        {
+          "version": "3.0.0",
+          "buildVersion": "1",
+          "date": "2026-01-11",
+          "downloadURL": "https://github.com/HttpAnimation/Openlyst-more-builds/releases/download/build-46/docan-3.0.0-2026-01-13-ios-unsigned.ipa",
+          "size": 10700875,
+          "localizedDescription": "# 3.0.0\n\n## New Features\n\n### AI Providers\n- Added DeepSeek AI support with `deepseek-chat` and `deepseek-reasoner` models.\n- Added LM Studio support with OpenAI-compatible API.\n- Dynamic model fetching from API.\n\n### Image Creator\n- Added dedicated Image Creator screen for generating images with AI.\n- Supports Gemini and OpenAI DALL-E providers.\n\n### Playbooks\n- Added Playbooks: User-created YAML integrations for extending Docan.\n- Create custom API integrations with a simple YAML SDK.\n\n### Attachments & Drag-and-Drop\n- Added support for attachments in chat.\n- Drag and drop files directly onto the app."
+        }
+      ],
+      "screenshots": [
+        "https://openlyst.ink/icons/Docan/chat.png",
+        "https://openlyst.ink/icons/Docan/chats.png",
+        "https://openlyst.ink/icons/Docan/providers.png"
+      ]
+    },
     {
       "name": "Doudou",
       "bundleIdentifier": "doudou",
