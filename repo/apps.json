@@ -1,0 +1,79 @@
+{
+  "name": "RepStore",
+  "subtitle": "Free and open source iOS applications",
+  "description": "A curated collection of free and open source iOS applications from OpenLyst.",
+  "iconURL": "https://repo.openlyst.ink/icon.png",
+  "headerURL": "https://repo.openlyst.ink/header.png",
+  "website": "https://openlyst.ink",
+  "tintColor": "#dc2626",
+  "featuredApps": [
+    "doudou",
+    "klit"
+  ],
+  "apps": [
+    {
+      "name": "Doudou",
+      "bundleIdentifier": "doudou",
+      "developerName": "OpenLyst Developer",
+      "subtitle": "Music player for self-hosted services",
+      "localizedDescription": "Break free from corporate streaming platforms. Doudou connects to your self-hosted music services like Jellyfin, Plex, and Navidrome, giving you complete control over your music library.",
+      "iconURL": "https://gitlab.com/Openlyst/doudou/-/raw/main/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png?ref_type=heads",
+      "tintColor": "#dc2626",
+      "category": "other",
+      "versions": [
+        {
+          "version": "12.0.0",
+          "buildVersion": "1",
+          "date": "2026-01-13",
+          "downloadURL": "https://github.com/HttpAnimation/Openlyst-more-builds/releases/download/build-45/doudou-12.0.0-2026-01-13-ios-unsigned.ipa",
+          "size": 13809264,
+          "localizedDescription": "# 12.0.0\n\n## Added\n- Added Downloads page to desktop UI with full download management support.\n- Added Download button to track context menu in desktop UI for offline listening.\n- Added track options menu to desktop now playing bar with queue, playlist, album, artist, and download actions.\n- Added \"Check for Updates\" feature to mobile and desktop settings that checks the OpenLyst API for new versions.\n- Added album art carousel to mobile now playing screen with rotary-style animation; swipe or tap side albums to change tracks.\n\n## Fixed\n- Fixed \\\"No CupertinoLocalizations found\\\" error on mobile pages by using GlobalCupertinoLocalizations delegate.\n- Fixed Windows unable to play any music by initializing JustAudioMediaKit for all desktop platforms (Windows, macOS, Linux).\n- Fixed Windows local music playback by using correct `file:///` URI format for Windows paths.\n- Fixed SMTC artwork loading errors on Windows when playing local music files.\n- Fixed local music album covers not displaying on desktop by adding support for file:// URIs in image widgets.\n- Fixed local music metadata (title, artist, album, duration) not being read from ID3 tags by adding `audiotags` package.\n- Fixed local music albums with various artists creating duplicate album entries by using album artist or folder path for grouping.\n- Fixed local music embedded album art not being extracted from audio files.\n- Fixed desktop home page \"See All\" buttons and Quick Access cards not navigating to their respective pages.\n- Fixed desktop play bar and now playing overlay not showing album art for local music files.\n- Fixed mobile UI not displaying album art for local music files (home, playlists, queue, track lists, album/playlist detail views).\n- Fixed mobile albums page showing yellow underlined text for album names and artist names.\n- Fixed mobile image loading showing error state while loading local files instead of proper placeholder.\n- Fixed mobile songs and favorites pages showing \"BOTTOM OVERFLOWED BY 1.00 PIXELS\" error by increasing item extent to match actual content height.\n- Fixed mobile search saving every keystroke as a recent search; now only committed searches (submit/tap) are saved.\n- Fixed adding local music on android.\n- Fixed `use_build_context_synchronously` warnings in Quick Connect authentication flow.\n- Fixed `use_build_context_synchronously` warning in local music settings artwork cache clearing.\n- Fixed `use_build_context_synchronously` warning in settings local music scan completion.\n- Fixed downloads not working for Navidrome/Subsonic servers by updating DownloadService to use MediaServiceManager for multi-platform support.\n- Fixed overflow issues on Downloads page for album cards and track list actions.\n- Fixed desktop volume slider UI not updating when dragging or clicking mute button.\n- Fixed VR headsets loading the Android Auto UI.\n- Fixed Account Information section not displaying for Navidrome, Subsonic, Plex, and Swing Music servers.\n- Fixed Windows volume slider bypassing system volume mixer by disabling WASAPI exclusive mode.\n- Fixed desktop light mode to apply across the UI instead of only partially updating.\n- Fixed local music \"Continue\" button not navigating to home screen after successful login.\n- Fixed Subsonic/Navidrome login not navigating to home screen after successful authentication by adding explicit navigation.\n- Fixed mobile queue overlay showing yellow underlined text by adding proper Material wrapper and TextDecoration.none styles.\n\n## Changed\n- Added \"Smart back\" audio toggle (mobile + desktop): if over 20% into a track, first back resets to 0:00; a quick second back goes to the previous track.\n- Simplified desktop settings layout to show only implemented options and clean up unused toggles.\n- Removed icons from home page section headers and shuffle buttons for cleaner mobile UI.\n- Removed emojis from login screen feature pills for a more professional appearance.\n- **Major codebase cleanup**: Removed all debug print statements (`kDebugMode` blocks) and verbose comments from 87 dart files across the entire codebase including screens, services, providers, widgets, models, and desktop folders.\n- Simplified navigation bar code structure.\n- Removed unused `_debugLinuxMpv()` function (~145 lines) from main.dart.\n- Dynamic Isle Player is now disabled by default.\n- Moved the UI to a new folder UI.\n- Refactored mobile Settings screen to use reusable components.\n- Hide Downloads page/tab when using local music mode (since files are already local).\n- Replaced desktop home page quick access cards (Liked Songs, All Albums, All Artists, Shuffle All) with two focused buttons: \"Shuffle All\" and \"Shuffle Favorites\".\n- Removed Quick Access section from mobile library page for a cleaner layout.\n\n## Performance\n- Cached `ImageFilter.blur` instances across mobile UI to prevent GPU recomputation on every frame (liquid_glass, mini_player, library, search, favorites).\n- Converted `Consumer<AppState>` to `Selector<AppState>` with `shouldRebuild` in home, library, songs, and search screens to reduce unnecessary widget rebuilds.\n- Added 300ms debounce timer to search input to reduce CPU usage during typing.\n- Added `itemExtent` and `cacheExtent` to `ListView.builder` widgets in home screen for smoother scrolling.\n- Changed `SliverList` to `SliverFixedExtentList` with fixed item heights in songs and favorites screens for better scroll performance.\n- Wrapped expensive `BackdropFilter` widgets in `RepaintBoundary` to isolate repaints.\n\n## Removed\n- Removed non-functional Google Cardboard VR player feature (entire `lib/cardboard` folder and related settings).\n- Removed non-functional audio settings: Normalize Volume, Gapless Playback, and Autoplay.\n- Removed Swing Music support.\n- Removed non-functional Collections and Genres sections from mobile library view."
+        },
+        {
+          "version": "11.0.0",
+          "buildVersion": "1",
+          "date": "2026-01-09",
+          "downloadURL": "https://files.catbox.moe/smjwse.ipa",
+          "localizedDescription": "# 11.0.0\n\n## Added\n\n- **Desktop System Media Controls** - Control playback from your OS taskbar/system tray without focusing Doudou.\n- **Google Assistant Support** - Voice commands for Android via Google Assistant App Actions.\n- **Autoplay** - Automatically plays similar music when the queue ends.\n- Added favorite button to the desktop fullscreen Now Playing overlay.\n- Added Easter Egg: Desktop Now Playing view flips horizontally when \"The Mind Electric\" plays its reversed section.\n\n## Changed\n\n- Refactored audio system from 4 platform-specific handlers into a single cross-platform UnifiedAudioHandler.\n- **Complete Desktop UI Redesign** with modern styling.\n\n## Fixed\n\n- Fixed mounted check issues causing setState calls after widget disposal.\n- Fixed Now Playing overlay not updating when the current song changes."
+        }
+      ],
+      "appPermissions": {
+        "entitlements": [],
+        "privacy": {
+          "NSLocalNetworkUsageDescription": "Doudou needs to access local network to connect to your Jellyfin server."
+        }
+      },
+      "screenshots": [
+        "https://gitlab.com/Openlyst/repos/altstore/-/raw/main/photos/doudou/7.0.0/home.PNG?ref_type=heads",
+        "https://gitlab.com/Openlyst/repos/altstore/-/raw/main/photos/doudou/7.0.0/nowplaying.PNG?ref_type=heads",
+        "https://gitlab.com/Openlyst/repos/altstore/-/raw/main/photos/doudou/7.0.0/albums.PNG?ref_type=heads"
+      ]
+    },
+    {
+      "name": "Klit",
+      "bundleIdentifier": "klit",
+      "developerName": "OpenLyst Developer",
+      "subtitle": "Advanced E926 client",
+      "localizedDescription": "The successor to BaoBao. A modern, privacy-focused client for the e621 community. Built with user experience and data protection as top priorities.",
+      "iconURL": "https://openlyst.ink/icons/Klit/icon.png",
+      "tintColor": "#ff6b35",
+      "category": "other",
+      "versions": [
+        {
+          "version": "5.0.0",
+          "buildVersion": "1",
+          "date": "2026-01-12",
+          "downloadURL": "https://github.com/HttpAnimation/Openlyst-more-builds/releases/download/build-25/klit-5.0.0-2026-01-12-ios-unsigned.ipa",
+          "size": 15176419,
+          "localizedDescription": "# 5.0.0\n\n- Fixed account manager not working.\n- Reload all data when switching accounts.\n- Fixed some platforms not having icons."
+        }
+      ],
+      "screenshots": [
+        "https://openlyst.ink/icons/Klit/home.png",
+        "https://openlyst.ink/icons/Klit/popular.png",
+        "https://openlyst.ink/icons/Klit/post.png"
+      ]
+    }
+  ],
+  "news": []
+}
