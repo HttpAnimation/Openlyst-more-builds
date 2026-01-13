@@ -9,6 +9,7 @@
   "featuredApps": [
     "docan",
     "doudou",
+    "finar",
     "klit"
   ],
   "apps": [
@@ -73,6 +74,26 @@
         "https://gitlab.com/Openlyst/repos/altstore/-/raw/main/photos/doudou/7.0.0/home.PNG?ref_type=heads",
         "https://gitlab.com/Openlyst/repos/altstore/-/raw/main/photos/doudou/7.0.0/nowplaying.PNG?ref_type=heads",
         "https://gitlab.com/Openlyst/repos/altstore/-/raw/main/photos/doudou/7.0.0/albums.PNG?ref_type=heads"
+      ]
+    },
+    {
+      "name": "Finar",
+      "bundleIdentifier": "finar",
+      "developerName": "OpenLyst Developer",
+      "subtitle": "Replacement frontend for Jellyfin",
+      "localizedDescription": "A beautiful, modern multi-platform Jellyfin client built with Flutter. Features native video playback powered by media_kit, glassmorphism design with blur effects and glass-like components, dark mode, offline support with Hive, and adaptive UI optimized for desktop, mobile, and TV.",
+      "iconURL": "https://gitlab.com/Openlyst/finar/-/raw/main/icon.svg?ref_type=heads",
+      "tintColor": "#6366f1",
+      "category": "other",
+      "versions": [
+        {
+          "version": "1.1.0",
+          "buildVersion": "1",
+          "date": "2026-01-11",
+          "downloadURL": "https://github.com/HttpAnimation/Openlyst-more-builds/releases/download/build-47/finar-1.1.0-2026-01-13-ios-unsigned.ipa",
+          "size": 15584555,
+          "localizedDescription": "# 1.1.0\n\n## Fixed\n- Fixed controller input in SteamOS"
+        }
       ]
     },
     {
