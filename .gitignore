@@ -45,3 +45,6 @@ htmlcov/
 *.tmp
 *.bak
 .DS_Store
+
+# repo
+/repo
