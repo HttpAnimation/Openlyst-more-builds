@@ -10,7 +10,8 @@
     "docan",
     "doudou",
     "finar",
-    "klit"
+    "klit",
+    "opentorrent"
   ],
   "apps": [
     {
@@ -127,6 +128,31 @@
         "https://openlyst.ink/icons/Klit/home.png",
         "https://openlyst.ink/icons/Klit/popular.png",
         "https://openlyst.ink/icons/Klit/post.png"
+      ]
+    },
+    {
+      "name": "Opentorrent",
+      "bundleIdentifier": "opentorrent",
+      "developerName": "OpenLyst Developer",
+      "subtitle": "qBittorrent client.",
+      "localizedDescription": "Manage your torrents with Opentorrent, a cross-platform qBittorrent client that brings seamless torrenting to iOS, macOS, Windows, Linux, Android, and the Web.",
+      "iconURL": "https://gitlab.com/Openlyst/opentorrent/-/raw/main/assets/icons/app_icon.png?ref_type=heads",
+      "tintColor": "#dc2626",
+      "category": "other",
+      "versions": [
+        {
+          "version": "1.0.0",
+          "buildVersion": "1",
+          "date": "2026-01-14",
+          "downloadURL": "https://github.com/HttpAnimation/Openlyst-more-builds/releases/download/build-52/opentorrent-1.0.0-2026-01-14-ios-unsigned.ipa",
+          "size": 9385199,
+          "localizedDescription": "Initial release of Opentorrent, a cross-platform qBittorrent client that brings seamless torrenting to iOS, macOS, Windows, Linux, Android, and the Web."
+        }
+      ],
+      "screenshots": [
+        "https://gitlab.com/Openlyst/openlyst/-/raw/main/static/icons/opentorrent/photo_2026-01-14_09-18-03.jpg?ref_type=heads",
+        "https://gitlab.com/Openlyst/openlyst/-/raw/main/static/icons/opentorrent/photo_2026-01-14_09-17-59.jpg?ref_type=heads",
+        "https://gitlab.com/Openlyst/openlyst/-/raw/main/static/icons/opentorrent/photo_2026-01-14_09-17-33.jpg?ref_type=heads"
       ]
     }
   ],
