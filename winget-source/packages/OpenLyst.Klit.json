@@ -29,6 +29,7 @@
           "Architecture": "x64",
           "InstallerType": "exe",
           "InstallerUrl": "https://github.com/HttpAnimation/Openlyst-more-builds/releases/download/build-49/klit-6.0.0-2026-01-14-windows-x64-setup.exe",
+          "InstallerSha256": "82CEE4B29753B3CEA407AD640B6C95540E551EB4262D4831AC990D72E4A4F10F",
           "Scope": "user"
         }
       ]

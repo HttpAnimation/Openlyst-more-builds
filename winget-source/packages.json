@@ -31,6 +31,7 @@
               "Architecture": "x64",
               "InstallerType": "zip",
               "InstallerUrl": "https://github.com/HttpAnimation/Openlyst-more-builds/releases/download/build-14/docan-windows-x64.zip",
+              "InstallerSha256": "12C32A72C85B1252ABFAF5B5870392A9F0E100BB053B98D61A8E405A08609835",
               "Scope": "user"
             }
           ]
@@ -68,6 +69,7 @@
               "Architecture": "x64",
               "InstallerType": "exe",
               "InstallerUrl": "https://github.com/HttpAnimation/Openlyst-more-builds/releases/download/build-45/doudou-12.0.0-2026-01-13-windows-x64-setup.exe",
+              "InstallerSha256": "401E56E21DC09C5344113CE732C107D88F626B615C87F714512367FFAE932FB0",
               "Scope": "user"
             }
           ]
@@ -105,6 +107,7 @@
               "Architecture": "x64",
               "InstallerType": "zip",
               "InstallerUrl": "https://github.com/HttpAnimation/Openlyst-more-builds/releases/download/build-18/finar-windows-x64.zip",
+              "InstallerSha256": "BD2952ADF96DE2DC20A8B76E604F36BAEF5893175626BAFCB703991071E12336",
               "Scope": "user"
             }
           ]
@@ -142,6 +145,7 @@
               "Architecture": "x64",
               "InstallerType": "exe",
               "InstallerUrl": "https://github.com/HttpAnimation/Openlyst-more-builds/releases/download/build-49/klit-6.0.0-2026-01-14-windows-x64-setup.exe",
+              "InstallerSha256": "82CEE4B29753B3CEA407AD640B6C95540E551EB4262D4831AC990D72E4A4F10F",
               "Scope": "user"
             }
           ]
@@ -179,6 +183,7 @@
               "Architecture": "x64",
               "InstallerType": "exe",
               "InstallerUrl": "https://github.com/HttpAnimation/Openlyst-more-builds/releases/download/build-52/opentorrent-1.0.0-2026-01-14-windows-x64-setup.exe",
+              "InstallerSha256": "48E67399431C6127AAE97FE13BF9278DA26C552D074BE3079BAF4F615737826D",
               "Scope": "user"
             }
           ]

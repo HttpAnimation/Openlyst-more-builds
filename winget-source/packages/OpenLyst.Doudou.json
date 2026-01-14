@@ -29,6 +29,7 @@
           "Architecture": "x64",
           "InstallerType": "exe",
           "InstallerUrl": "https://github.com/HttpAnimation/Openlyst-more-builds/releases/download/build-45/doudou-12.0.0-2026-01-13-windows-x64-setup.exe",
+          "InstallerSha256": "401E56E21DC09C5344113CE732C107D88F626B615C87F714512367FFAE932FB0",
           "Scope": "user"
         }
       ]

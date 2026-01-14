@@ -29,6 +29,7 @@
           "Architecture": "x64",
           "InstallerType": "exe",
           "InstallerUrl": "https://github.com/HttpAnimation/Openlyst-more-builds/releases/download/build-52/opentorrent-1.0.0-2026-01-14-windows-x64-setup.exe",
+          "InstallerSha256": "48E67399431C6127AAE97FE13BF9278DA26C552D074BE3079BAF4F615737826D",
           "Scope": "user"
         }
       ]

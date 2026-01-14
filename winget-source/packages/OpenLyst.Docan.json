@@ -29,6 +29,7 @@
           "Architecture": "x64",
           "InstallerType": "zip",
           "InstallerUrl": "https://github.com/HttpAnimation/Openlyst-more-builds/releases/download/build-14/docan-windows-x64.zip",
+          "InstallerSha256": "12C32A72C85B1252ABFAF5B5870392A9F0E100BB053B98D61A8E405A08609835",
           "Scope": "user"
         }
       ]

@@ -2,7 +2,7 @@
   "name": "OpenLyst Winget REST Source",
   "description": "REST API source for Winget to install Windows applications from OpenLyst",
   "homepage": "https://openlyst.ink",
-  "generated_at": "2026-01-14T12:10:42.085236Z",
+  "generated_at": "2026-01-14T19:12:11.740607Z",
   "base_url": "https://raw.githubusercontent.com/HttpAnimation/Openlyst-more-builds/main/winget-source",
   "package_count": 5,
   "usage": "winget source add openlyst https://raw.githubusercontent.com/HttpAnimation/Openlyst-more-builds/main/winget-source"
