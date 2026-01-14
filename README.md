@@ -62,7 +62,7 @@ brew install --cask httpanimation/openlyst-more-builds/app-name
 Add the OpenLyst source to Winget:
 
 ```powershell
-winget source add openlyst https://raw.githubusercontent.com/HttpAnimation/Openlyst-more-builds/main/winget-source
+winget source add openlyst https://raw.githubusercontent.com/HttpAnimation/Openlyst-more-builds/main/winget-source/information.json
 ```
 
 Then install packages:
@@ -79,7 +79,7 @@ Repository: [https://github.com/HttpAnimation/Openlyst-more-builds](https://gith
 
 ### Available Commands
 
-- **Add source**: `winget source add openlyst https://raw.githubusercontent.com/HttpAnimation/Openlyst-more-builds/main/winget-source`
+- **Add source**: `winget source add openlyst https://raw.githubusercontent.com/HttpAnimation/Openlyst-more-builds/main/winget-source/information.json`
 - **Search packages**: `winget search --source openlyst`
 - **Install application**: `winget install OpenLyst.AppName --source openlyst`
 - **Get package info**: `winget show OpenLyst.AppName --source openlyst`

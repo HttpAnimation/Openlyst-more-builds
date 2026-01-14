@@ -7,7 +7,7 @@ This is a REST API source for Winget that allows you to install Windows applicat
 Add this source to Winget:
 
 ```powershell
-winget source add openlyst https://raw.githubusercontent.com/HttpAnimation/Openlyst-more-builds/main/winget-source
+winget source add openlyst https://raw.githubusercontent.com/HttpAnimation/Openlyst-more-builds/main/winget-source/information.json
 ```
 
 ## Installation
@@ -55,7 +55,7 @@ All packages use the `OpenLyst.` prefix:
 
 ```powershell
 # Add source (one-time setup)
-winget source add openlyst https://raw.githubusercontent.com/HttpAnimation/Openlyst-more-builds/main/winget-source
+winget source add openlyst https://raw.githubusercontent.com/HttpAnimation/Openlyst-more-builds/main/winget-source/information.json
 
 # Search for applications
 winget search --source openlyst
