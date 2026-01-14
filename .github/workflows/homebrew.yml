@@ -6,7 +6,7 @@ on:
       platform:
         description: 'Platform to build for (macOS or Linux)'
         required: false
-        default: 'macOS'
+        default: 'both'
         type: choice
         options:
           - macOS
