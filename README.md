@@ -55,42 +55,6 @@ brew install --cask httpanimation/openlyst-more-builds/app-name
 - Manual updates can be triggered via the "Build Homebrew Tap" workflow
 - To refresh the tap: run the "Build Homebrew Tap" workflow in GitHub Actions
 
-## Winget (Windows)
-
-### Quick Setup
-
-Add the OpenLyst source to Winget:
-
-```powershell
-winget source add openlyst https://raw.githubusercontent.com/HttpAnimation/Openlyst-more-builds/main/winget-source/information.json
-```
-
-Then install packages:
-
-```powershell
-# Install a specific OpenLyst application
-winget install OpenLyst.Docan --source openlyst
-
-# Search for available applications  
-winget search --source openlyst
-```
-
-Repository: [https://github.com/HttpAnimation/Openlyst-more-builds](https://github.com/HttpAnimation/Openlyst-more-builds)
-
-### Available Commands
-
-- **Add source**: `winget source add openlyst https://raw.githubusercontent.com/HttpAnimation/Openlyst-more-builds/main/winget-source/information.json`
-- **Search packages**: `winget search --source openlyst`
-- **Install application**: `winget install OpenLyst.AppName --source openlyst`
-- **Get package info**: `winget show OpenLyst.AppName --source openlyst`
-- **Uninstall application**: `winget uninstall OpenLyst.AppName`
-- **Remove source**: `winget source remove openlyst`
-
-### Automated Updates
-
-- The source is automatically updated via GitHub Actions
-- Manual updates can be triggered via the "Build Winget Source" workflow
-
 ## F-Droid (Android)
 
 ### Quick Setup
