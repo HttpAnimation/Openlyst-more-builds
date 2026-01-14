@@ -121,6 +121,57 @@ class HomebrewFormulaGenerator:
             sanitized = f"App{sanitized}"
         return sanitized
     
+    def get_download_url_for_platform(self, version: Dict, platform: str) -> Optional[str]:
+        """Extract appropriate download URL for the specified platform from version data"""
+        downloads = version.get('downloads', {})
+        platform_downloads = downloads.get(platform, {})
+        
+        if not platform_downloads:
+            return None
+        
+        # Priority order for different package types based on platform
+        if platform == "macOS":
+            # Prefer universal, then arm64, then x86_64
+            for arch in ['universal', 'arm64', 'x86_64']:
+                if arch in platform_downloads and platform_downloads[arch]:
+                    return platform_downloads[arch]
+        
+        elif platform == "Linux":
+            # Prefer AppImage, then zip, then deb, then rpm
+            for package_type in ['appimage', 'zip', 'deb', 'rpm']:
+                if package_type in platform_downloads:
+                    pkg_data = platform_downloads[package_type]
+                    # Check for x86_64 architecture first
+                    if isinstance(pkg_data, dict):
+                        for arch in ['x86_64', 'arm64']:
+                            if arch in pkg_data and pkg_data[arch]:
+                                return pkg_data[arch]
+                    elif isinstance(pkg_data, str) and pkg_data:
+                        return pkg_data
+        
+        elif platform == "Windows":
+            # Prefer zip, then exe, then msi
+            for package_type in ['zip', 'exe', 'msi']:
+                if package_type in platform_downloads:
+                    pkg_data = platform_downloads[package_type]
+                    if isinstance(pkg_data, dict):
+                        for arch in ['x86_64', 'arm64']:
+                            if arch in pkg_data and pkg_data[arch]:
+                                return pkg_data[arch]
+                    elif isinstance(pkg_data, str) and pkg_data:
+                        return pkg_data
+        
+        # Fallback: try to find any URL in the platform downloads
+        for key, value in platform_downloads.items():
+            if isinstance(value, dict):
+                for arch_key, arch_value in value.items():
+                    if isinstance(arch_value, str) and arch_value.startswith('http'):
+                        return arch_value
+            elif isinstance(value, str) and value.startswith('http'):
+                return value
+        
+        return None
+    
     def get_download_url_sha256(self, url: str) -> Optional[str]:
         """Calculate SHA256 hash of download file"""
         try:
@@ -140,11 +191,32 @@ class HomebrewFormulaGenerator:
         except Exception as e:
             logger.warning(f"Failed to calculate SHA256 for {url}: {e}")
             return None
+        """Calculate SHA256 hash of download file"""
+        try:
+            logger.info(f"Calculating SHA256 for {url}")
+            response = requests.head(url, timeout=30)
+            if response.status_code != 200:
+                # Try GET if HEAD fails
+                response = requests.get(url, timeout=30)
+                if response.status_code == 200:
+                    return hashlib.sha256(response.content).hexdigest()
+            else:
+                # For HEAD request, we need to download to get hash
+                response = requests.get(url, timeout=30)
+                if response.status_code == 200:
+                    return hashlib.sha256(response.content).hexdigest()
+            return None
+        except Exception as e:
+            logger.warning(f"Failed to calculate SHA256 for {url}: {e}")
+            return None
     
-    def generate_formula_content(self, app: Dict, version: Dict) -> str:
+    def generate_formula_content(self, app: Dict, version: Dict, platform: str) -> str:
         """Generate Homebrew formula content for an app version"""
         class_name = self.sanitize_class_name(app['name'])
-        download_url = version.get('downloadURL', '')
+        download_url = self.get_download_url_for_platform(version, platform)
+        
+        if not download_url:
+            raise ValueError(f"No download URL found for {app['name']} on {platform}")
         
         # Extract file extension to determine installation method
         url_path = urlparse(download_url).path
@@ -234,7 +306,7 @@ end
         return f'''    # Generic installation
     prefix.install Dir["*"]'''
     
-    def generate_formula(self, app: Dict, versions: List[Dict]) -> bool:
+    def generate_formula(self, app: Dict, versions: List[Dict], platform: str) -> bool:
         """Generate Homebrew formula for an app"""
         if not versions:
             logger.warning(f"No versions found for app {app.get('name', 'Unknown')}")
@@ -243,13 +315,14 @@ end
         # Use the latest version
         latest_version = versions[0]
         
-        # Skip if no download URL
-        if not latest_version.get('downloadURL'):
-            logger.warning(f"No download URL for app {app.get('name', 'Unknown')}")
+        # Check if this app supports the target platform
+        app_platforms = latest_version.get('platforms', [])
+        if platform not in app_platforms:
+            logger.info(f"App {app.get('name', 'Unknown')} does not support {platform} platform")
             return False
         
         try:
-            formula_content = self.generate_formula_content(app, latest_version)
+            formula_content = self.generate_formula_content(app, latest_version, platform)
             
             # Generate filename
             class_name = self.sanitize_class_name(app['name'])
@@ -262,6 +335,9 @@ end
             logger.info(f"Generated formula: {formula_path}")
             return True
             
+        except ValueError as e:
+            logger.warning(f"Skipping {app.get('name', 'Unknown')}: {e}")
+            return False
         except Exception as e:
             logger.error(f"Failed to generate formula for {app.get('name', 'Unknown')}: {e}")
             return False
@@ -310,7 +386,7 @@ def main():
         # Get versions for this app
         versions = client.get_app_versions(slug)
         
-        if generator.generate_formula(app, versions):
+        if generator.generate_formula(app, versions, args.platform):
             generated_count += 1
         else:
             failed_count += 1
