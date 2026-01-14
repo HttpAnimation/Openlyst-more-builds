@@ -13,6 +13,16 @@ Notes
 
 ## Homebrew (macOS/Linux)
 
+### Quick Setup
+
+Add this Homebrew tap:
+
+```bash
+brew tap httpanimation/openlyst-more-builds
+```
+
+Repository: [https://github.com/HttpAnimation/Openlyst-more-builds](https://github.com/HttpAnimation/Openlyst-more-builds)
+
 ### Installation
 
 First, add this tap to your Homebrew:
