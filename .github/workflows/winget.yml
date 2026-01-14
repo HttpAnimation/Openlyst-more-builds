@@ -1,4 +1,4 @@
-name: Build Winget Repository
+name: Build Winget Source
 
 on:
   workflow_dispatch:
@@ -13,7 +13,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: "winget-repo"
+  group: "winget-source"
   cancel-in-progress: false
 
 jobs:
@@ -38,29 +38,29 @@ jobs:
           pip install -r requirements.txt
           pip install PyYAML
       
-      - name: Build Winget repository
+      - name: Build Winget source
         run: |
           if [ "${{ github.event.inputs.calculate_hash }}" = "true" ]; then
-            python build_winget_repo.py \
-              --output-dir winget-repo \
+            python build_winget_source.py \
+              --output-dir winget-source \
               --calculate-hash \
               --verbose
           else
-            python build_winget_repo.py \
-              --output-dir winget-repo \
+            python build_winget_source.py \
+              --output-dir winget-source \
               --verbose
           fi
       
       - name: Display build output
         run: |
-          echo "=== Winget Repository Structure ==="
-          find winget-repo/manifests -type f -name "*.yaml" | head -10
+          echo "=== Winget Source Structure ==="
+          find winget-source -type f -name "*.json" | head -10
           echo ""
-          echo "=== Generated Manifest Count ==="
-          find winget-repo/manifests -name "*.yaml" | wc -l
+          echo "=== Generated JSON Files ==="
+          find winget-source -name "*.json" | wc -l
           echo ""
-          echo "=== Sample Manifest ==="
-          find winget-repo/manifests -name "*.yaml" | head -1 | xargs cat || echo "No manifests generated"
+          echo "=== Sample JSON File ==="
+          find winget-source -name "*.json" | head -1 | xargs cat || echo "No JSON files generated"
       
       - name: Configure git
         run: |
@@ -69,11 +69,11 @@ jobs:
       
       - name: Commit and push changes
         run: |
-          git add winget-repo/
+          git add winget-source/
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Update Winget manifests $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            git commit -m "Update Winget source $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
             # Try to push, if it fails due to conflicts, pull and retry
             if ! git push; then
               echo "Push failed, pulling latest changes and retrying..."

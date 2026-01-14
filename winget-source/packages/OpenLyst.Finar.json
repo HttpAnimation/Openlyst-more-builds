@@ -1,0 +1,37 @@
+{
+  "PackageIdentifier": "OpenLyst.Finar",
+  "PackageName": "Finar",
+  "Publisher": "OpenLyst",
+  "PublisherUrl": "https://openlyst.ink",
+  "PackageUrl": "https://openlyst.ink",
+  "License": "Open Source",
+  "LicenseUrl": "https://openlyst.ink",
+  "ShortDescription": "Replacement frontend for Jellyfin",
+  "Description": "A beautiful, modern multi-platform Jellyfin client built with Flutter. Features native video playback powered by media_kit, glassmorphism design with blur effects and glass-like components, dark mode, offline support with Hive, and adaptive UI optimized for desktop, mobile, and TV.",
+  "Tags": [
+    "opensource",
+    "free",
+    "openlyst"
+  ],
+  "Versions": [
+    {
+      "PackageVersion": "1.1.0",
+      "DefaultLocale": {
+        "PackageLocale": "en-US",
+        "Publisher": "OpenLyst",
+        "PackageName": "Finar",
+        "License": "Open Source",
+        "ShortDescription": "Replacement frontend for Jellyfin",
+        "Description": "A beautiful, modern multi-platform Jellyfin client built with Flutter. Features native video playback powered by media_kit, glassmorphism design with blur effects and glass-like components, dark mode, offline support with Hive, and adaptive UI optimized for desktop, mobile, and TV."
+      },
+      "Installers": [
+        {
+          "Architecture": "x64",
+          "InstallerType": "zip",
+          "InstallerUrl": "https://github.com/HttpAnimation/Openlyst-more-builds/releases/download/build-18/finar-windows-x64.zip",
+          "Scope": "user"
+        }
+      ]
+    }
+  ]
+}

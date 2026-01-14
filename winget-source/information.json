@@ -1,0 +1,19 @@
+{
+  "Data": {
+    "SourceIdentifier": "OpenLyst",
+    "ServerSupportedVersions": [
+      "1.4.0",
+      "1.5.0"
+    ],
+    "SourceName": "OpenLyst",
+    "SourceAgreements": {
+      "AgreementsIdentifier": "OpenLyst_1.0",
+      "AgreementLabel": "OpenLyst Terms",
+      "Agreement": "By using this source, you agree to the OpenLyst terms of service.",
+      "AgreementUrl": "https://openlyst.ink"
+    },
+    "UnsupportedPackageMatchFields": [],
+    "RequiredPackageMatchFields": [],
+    "UnsupportedQueryParameters": []
+  }
+}

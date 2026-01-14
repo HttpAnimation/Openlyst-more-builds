@@ -59,29 +59,37 @@ brew install --cask httpanimation/openlyst-more-builds/app-name
 
 ### Quick Setup
 
-Install packages using Windows Package Manager:
+Add the OpenLyst source to Winget:
+
+```powershell
+winget source add openlyst https://raw.githubusercontent.com/HttpAnimation/Openlyst-more-builds/main/winget-source
+```
+
+Then install packages:
 
 ```powershell
 # Install a specific OpenLyst application
-winget install OpenLyst.AppName
+winget install OpenLyst.Docan --source openlyst
 
-# Search for available applications
-winget search OpenLyst.
+# Search for available applications  
+winget search --source openlyst
 ```
 
 Repository: [https://github.com/HttpAnimation/Openlyst-more-builds](https://github.com/HttpAnimation/Openlyst-more-builds)
 
 ### Available Commands
 
-- **Search packages**: `winget search OpenLyst.`
-- **Install application**: `winget install OpenLyst.AppName`
-- **Get package info**: `winget show OpenLyst.AppName`
+- **Add source**: `winget source add openlyst https://raw.githubusercontent.com/HttpAnimation/Openlyst-more-builds/main/winget-source`
+- **Search packages**: `winget search --source openlyst`
+- **Install application**: `winget install OpenLyst.AppName --source openlyst`
+- **Get package info**: `winget show OpenLyst.AppName --source openlyst`
 - **Uninstall application**: `winget uninstall OpenLyst.AppName`
+- **Remove source**: `winget source remove openlyst`
 
 ### Automated Updates
 
-- Manifests are automatically updated via GitHub Actions
-- Manual updates can be triggered via the "Build Winget Repository" workflow
+- The source is automatically updated via GitHub Actions
+- Manual updates can be triggered via the "Build Winget Source" workflow
 
 ## F-Droid (Android)
 

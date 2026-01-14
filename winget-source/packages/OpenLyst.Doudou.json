@@ -1,0 +1,37 @@
+{
+  "PackageIdentifier": "OpenLyst.Doudou",
+  "PackageName": "Doudou",
+  "Publisher": "OpenLyst",
+  "PublisherUrl": "https://openlyst.ink",
+  "PackageUrl": "https://openlyst.ink",
+  "License": "Open Source",
+  "LicenseUrl": "https://openlyst.ink",
+  "ShortDescription": "Music player for self-hosted services",
+  "Description": "Break free from corporate streaming platforms. Doudou connects to your self-hosted music services like Jellyfin, Plex, and Navidrome, giving you complete control over your music library.",
+  "Tags": [
+    "opensource",
+    "free",
+    "openlyst"
+  ],
+  "Versions": [
+    {
+      "PackageVersion": "12.0.0",
+      "DefaultLocale": {
+        "PackageLocale": "en-US",
+        "Publisher": "OpenLyst",
+        "PackageName": "Doudou",
+        "License": "Open Source",
+        "ShortDescription": "Music player for self-hosted services",
+        "Description": "Break free from corporate streaming platforms. Doudou connects to your self-hosted music services like Jellyfin, Plex, and Navidrome, giving you complete control over your music library."
+      },
+      "Installers": [
+        {
+          "Architecture": "x64",
+          "InstallerType": "exe",
+          "InstallerUrl": "https://github.com/HttpAnimation/Openlyst-more-builds/releases/download/build-45/doudou-12.0.0-2026-01-13-windows-x64-setup.exe",
+          "Scope": "user"
+        }
+      ]
+    }
+  ]
+}
