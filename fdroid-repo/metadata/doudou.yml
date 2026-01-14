@@ -1,0 +1,35 @@
+Categories:
+  - System
+  - Internet
+
+License: Unknown
+AuthorName: OpenLyst
+AuthorEmail: contact@openlyst.ink
+AuthorWebSite: https://openlyst.ink
+
+Summary: Music player for self-hosted services
+Description: |
+    Break free from corporate streaming platforms. Doudou connects to your self-hosted music services like Jellyfin, Plex, and Navidrome, giving you complete control over your music library.
+    
+    This application is part of the OpenLyst project, providing free and open source software.
+
+RepoType: none
+Repo: 
+
+IssueTracker: https://openlyst.ink/support
+Changelog: https://openlyst.ink/apps/doudou
+Donate: https://openlyst.ink/contribute
+
+AutoName: Doudou
+
+RequiredTargetSdk: 33
+
+Builds:
+  - versionName: '12.0.0'
+    versionCode: 120000
+    disable: 'Pre-built binary from OpenLyst'
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 12.0.0
+CurrentVersionCode: 120000
