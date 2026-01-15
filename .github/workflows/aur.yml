@@ -56,7 +56,7 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           
-          # Write SSH key preserving newlines (use printf to handle multiline properly)
+          # Write SSH key preserving newlines
           printf '%s\n' "$AUR_SSH_KEY" > ~/.ssh/aur_ed25519
           chmod 600 ~/.ssh/aur_ed25519
           
@@ -65,14 +65,21 @@ jobs:
           echo "SSH key last line: $(tail -1 ~/.ssh/aur_ed25519)"
           echo "SSH key line count: $(wc -l < ~/.ssh/aur_ed25519)"
           
-          # Configure SSH for AUR (no indentation in heredoc content)
-          cat >> ~/.ssh/config << 'EOF'
+          # Configure SSH for AUR
+          cat > ~/.ssh/config << 'SSHCONFIG'
           Host aur.archlinux.org
-              IdentityFile ~/.ssh/aur_ed25519
-              User aur
-              StrictHostKeyChecking accept-new
-          EOF
+            IdentityFile ~/.ssh/aur_ed25519
+            User aur
+            StrictHostKeyChecking accept-new
+          SSHCONFIG
+          # Remove leading whitespace from config
+          sed -i 's/^[[:space:]]*//' ~/.ssh/config
           chmod 600 ~/.ssh/config
+          
+          # Debug: Show config content
+          echo "=== SSH Config ==="
+          cat ~/.ssh/config
+          echo "=================="
           
           # Debug: Check SSH key validity
           ssh-keygen -l -f ~/.ssh/aur_ed25519 || echo "Warning: Could not read key fingerprint"
