@@ -20,7 +20,25 @@ To push updates to AUR, you need to add your SSH private key as a GitHub secret.
 2. Navigate to **Secrets and variables** → **Actions**
 3. Click **New repository secret**
 4. Name: `AUR_SSH_PRIVATE_KEY`
-5. Value: Paste the contents of your `id_ed25519` private key
+5. Value: Paste the **entire** contents of your `id_ed25519` private key
+
+#### Important: Preserving Newlines
+
+The SSH key **must** have proper newlines. When pasting, ensure:
+- Include the `-----BEGIN OPENSSH PRIVATE KEY-----` header
+- Include the `-----END OPENSSH PRIVATE KEY-----` footer
+- The key should have approximately 6-8 lines total for ed25519
+
+Example format (your actual key will be different):
+```
+-----BEGIN OPENSSH PRIVATE KEY-----
+b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
+QyNTUxOQAAACCk4L1aTrT3BOcrigMToAzlpkzRiWyNPksfe2GbIjEnKQAAAJgxxxxxxxx
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+xxxxxxxxxxxxxx==
+-----END OPENSSH PRIVATE KEY-----
+```
 
 > ⚠️ **Security Note**: Never commit your private key to the repository. Always use GitHub Secrets.
 
