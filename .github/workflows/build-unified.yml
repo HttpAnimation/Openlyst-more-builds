@@ -1,0 +1,150 @@
+name: Build All Repositories
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Build target'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - altstore
+          - fdroid
+          - homebrew
+      platform:
+        description: 'Homebrew platform (only for homebrew target)'
+        required: false
+        default: 'both'
+        type: choice
+        options:
+          - both
+          - macOS
+          - Linux
+      calculate_hashes:
+        description: 'Calculate SHA256 hashes (slower but more complete)'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: "build-repos"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Build repositories
+        env:
+          TARGET: ${{ github.event.inputs.target || 'all' }}
+          PLATFORM: ${{ github.event.inputs.platform || 'both' }}
+          CALC_HASHES: ${{ github.event.inputs.calculate_hashes || 'false' }}
+        run: |
+          ARGS="--target $TARGET --platform $PLATFORM --verbose"
+          
+          if [ "$CALC_HASHES" = "true" ]; then
+            ARGS="$ARGS --calculate-sha256 --calculate-info"
+          fi
+          
+          python build.py $ARGS
+      
+      - name: Display build output
+        run: |
+          echo "=== Build Output Structure ==="
+          echo ""
+          
+          if [ -d "repo" ]; then
+            echo "--- AltStore Repository ---"
+            ls -lah repo/ 2>/dev/null || echo "Empty"
+            echo "Apps in repo:"
+            jq -r '.apps[].name' repo/apps.json 2>/dev/null || echo "No apps.json"
+            echo ""
+          fi
+          
+          if [ -d "fdroid-repo" ]; then
+            echo "--- F-Droid Repository ---"
+            ls -lah fdroid-repo/ 2>/dev/null || echo "Empty"
+            echo "Metadata files:"
+            find fdroid-repo/metadata -name "*.yml" 2>/dev/null | wc -l || echo "0"
+            echo ""
+          fi
+          
+          if [ -d "homebrew-tap" ]; then
+            echo "--- Homebrew Tap ---"
+            ls -lah homebrew-tap/Formula/ 2>/dev/null || echo "Empty"
+            echo "Formulae count:"
+            find homebrew-tap/Formula -name "*.rb" 2>/dev/null | wc -l || echo "0"
+          fi
+      
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      
+      - name: Commit and push changes
+        run: |
+          # Add all output directories
+          git add repo/ fdroid-repo/ homebrew-tap/ 2>/dev/null || true
+          
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            TARGETS="${{ github.event.inputs.target || 'all' }}"
+            git commit -m "Update repositories ($TARGETS) - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            
+            # Try to push, pull and retry on conflict
+            if ! git push; then
+              echo "Push failed, pulling latest changes and retrying..."
+              git pull origin main --rebase
+              git push
+            fi
+          fi
+      
+      - name: Upload AltStore artifact
+        if: contains(github.event.inputs.target || 'all', 'altstore') || github.event.inputs.target == 'all'
+        uses: actions/upload-artifact@v4
+        with:
+          name: altstore-repo
+          path: repo/
+          retention-days: 90
+          if-no-files-found: ignore
+      
+      - name: Upload F-Droid artifact
+        if: contains(github.event.inputs.target || 'all', 'fdroid') || github.event.inputs.target == 'all'
+        uses: actions/upload-artifact@v4
+        with:
+          name: fdroid-repo
+          path: fdroid-repo/
+          retention-days: 90
+          if-no-files-found: ignore
+      
+      - name: Upload Homebrew artifact
+        if: contains(github.event.inputs.target || 'all', 'homebrew') || github.event.inputs.target == 'all'
+        uses: actions/upload-artifact@v4
+        with:
+          name: homebrew-tap
+          path: homebrew-tap/
+          retention-days: 90
+          if-no-files-found: ignore
