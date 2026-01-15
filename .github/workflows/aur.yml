@@ -51,13 +51,22 @@ jobs:
           pip install -r requirements.txt
       
       - name: Setup SSH key for AUR
+        env:
+          AUR_SSH_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.AUR_SSH_PRIVATE_KEY }}" > ~/.ssh/aur_ed25519
+          
+          # Write SSH key preserving newlines (use printf to handle multiline properly)
+          printf '%s\n' "$AUR_SSH_KEY" > ~/.ssh/aur_ed25519
           chmod 600 ~/.ssh/aur_ed25519
           
-          # Configure SSH for AUR
-          cat >> ~/.ssh/config << EOF
+          # Verify the key format
+          echo "SSH key first line: $(head -1 ~/.ssh/aur_ed25519)"
+          echo "SSH key last line: $(tail -1 ~/.ssh/aur_ed25519)"
+          echo "SSH key line count: $(wc -l < ~/.ssh/aur_ed25519)"
+          
+          # Configure SSH for AUR (no indentation in heredoc content)
+          cat >> ~/.ssh/config << 'EOF'
           Host aur.archlinux.org
               IdentityFile ~/.ssh/aur_ed25519
               User aur
@@ -65,8 +74,11 @@ jobs:
           EOF
           chmod 600 ~/.ssh/config
           
+          # Debug: Check SSH key validity
+          ssh-keygen -l -f ~/.ssh/aur_ed25519 || echo "Warning: Could not read key fingerprint"
+          
           # Test SSH connection (will add host to known_hosts)
-          ssh -T aur@aur.archlinux.org || true
+          ssh -vT aur@aur.archlinux.org 2>&1 | head -50 || true
       
       - name: Configure Git
         run: |
