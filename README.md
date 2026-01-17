@@ -86,6 +86,68 @@ brew install --cask httpanimation/openlyst-more-builds/app-name
 
 ---
 
+## Docker
+
+Docker images are published to GitHub Container Registry (ghcr.io) for web-based applications.
+
+### Available Images
+
+| App | Image | Description |
+|-----|-------|-------------|
+| Finar | `ghcr.io/httpanimation/finar` | Jellyfin web client |
+
+### Quick Start
+
+```bash
+# Pull the latest image
+docker pull ghcr.io/httpanimation/<app-name>:latest
+
+# Run with default settings
+docker run -d -p 8080:80 ghcr.io/httpanimation/<app-name>:latest
+```
+
+### Finar
+
+A beautiful, modern Jellyfin client built with Flutter.
+
+```bash
+# Pull the image
+docker pull ghcr.io/httpanimation/finar:latest
+
+# Run the container
+docker run -d -p 8080:80 ghcr.io/httpanimation/finar:latest
+
+# Run with Jellyfin proxy (for CORS)
+docker run -d -p 8080:80 -e JELLYFIN_URL=http://your-jellyfin-server:8096 ghcr.io/httpanimation/finar:latest
+```
+
+Then open http://localhost:8080 in your browser.
+
+### Docker Compose
+
+Example `docker-compose.yml`:
+
+```yaml
+services:
+  finar:
+    image: ghcr.io/httpanimation/finar:latest
+    ports:
+      - "8080:80"
+    environment:
+      - JELLYFIN_URL=http://your-jellyfin-server:8096  # Optional: for CORS proxy
+    restart: unless-stopped
+```
+
+### Available Tags
+
+| Tag | Description |
+|-----|-------------|
+| `latest` | Latest stable release |
+| `x.y.z` | Specific version (e.g., `1.0.0`) |
+| `x.y.z-YYYY-MM-DD` | Version with build date |
+
+---
+
 ## Development
 
 ### Requirements
