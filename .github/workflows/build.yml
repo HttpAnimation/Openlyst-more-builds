@@ -3163,8 +3163,12 @@ jobs:
       - name: Generate SHA256 checksums
         run: |
           echo "Generating SHA256 checksums..."
-          # Create checksums file
-          find . -type f \( -name "*.zip" -o -name "*.apk" -o -name "*.aab" -o -name "*.ipa" -o -name "*.deb" -o -name "*.AppImage" -o -name "*.exe" -o -name "*.tar.gz" \) -exec sha256sum {} \; | sed 's|\./||' > SHA256SUMS.txt
+          # Create checksums file with header so it's never empty
+          echo "# SHA256 checksums for build artifacts" > SHA256SUMS.txt
+          echo "# Generated on $(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> SHA256SUMS.txt
+          echo "" >> SHA256SUMS.txt
+          # Add checksums for any files found
+          find . -type f \( -name "*.zip" -o -name "*.apk" -o -name "*.aab" -o -name "*.ipa" -o -name "*.deb" -o -name "*.AppImage" -o -name "*.exe" -o -name "*.tar.gz" \) -exec sha256sum {} \; | sed 's|\./||' >> SHA256SUMS.txt
           echo "=== SHA256 Checksums ==="
           cat SHA256SUMS.txt
 
@@ -3518,6 +3522,7 @@ jobs:
           tag_name: build-${{ github.run_number }}
           name: "Build #${{ github.run_number }} - ${{ steps.date.outputs.date }}"
           body_path: release_notes.md
+          fail_on_unmatched_files: false
           files: |
             *.zip
             *.apk
